@@ -2,7 +2,7 @@
 'use client';
 
 import { contacts, messages as allMessages } from '@/lib/data';
-import type { Contact } from '@/lib/types';
+import type { Contact, Message } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MessageInput } from './MessageInput';
 import { MessageDisplay } from './MessageDisplay';
@@ -16,8 +16,9 @@ import { CallView } from './CallView';
 
 export function ChatView({ contactId }: { contactId: string }) {
   const contact: Contact | undefined = contacts.find((c) => c.id === contactId);
-  const messages = allMessages[contactId] || [];
+  const initialMessages = allMessages[contactId] || [];
 
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [callState, setCallState] = useState<{active: boolean, type: 'video' | 'voice' | null}>({ active: false, type: null });
 
   if (!contact) {
@@ -31,6 +32,18 @@ export function ChatView({ contactId }: { contactId: string }) {
   const endCall = () => {
     setCallState({ active: false, type: null });
   }
+  
+  const handleSendMessage = (content: string) => {
+    const newMessage: Message = {
+      id: `m-${Date.now()}`,
+      sender: 'me',
+      type: 'text',
+      content,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+    setMessages(prevMessages => [...prevMessages, newMessage]);
+  };
+
 
   if (!contact) {
     notFound();
@@ -64,7 +77,7 @@ export function ChatView({ contactId }: { contactId: string }) {
         </div>
       </ScrollArea>
 
-      <MessageInput />
+      <MessageInput onSendMessage={handleSendMessage} />
     </div>
     {callState.active && contact && (
         <CallView 
