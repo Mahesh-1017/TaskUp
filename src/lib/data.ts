@@ -1,4 +1,10 @@
-import type { Contact, Message } from './types';
+import type { Contact, Message, User } from './types';
+
+export const currentUser: User = {
+  id: 'me',
+  name: 'You',
+  avatar: '', // Initially empty, user can set it
+};
 
 export const contacts: Contact[] = [
   {
