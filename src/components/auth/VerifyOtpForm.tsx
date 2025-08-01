@@ -1,12 +1,13 @@
+
 'use client';
 
 import { useFormStatus } from 'react-dom';
-import { verifyOtp } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useActionState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -18,21 +19,57 @@ function SubmitButton() {
 }
 
 export function VerifyOtpForm() {
-  const [state, formAction] = useActionState(verifyOtp, null);
+  const [otp, setOtp] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
-  useEffect(() => {
-    if (state?.errors?.otp) {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    if (!window.confirmationResult) {
         toast({
             variant: "destructive",
             title: "Verification Failed",
-            description: state.errors.otp[0]
-        })
+            description: "No confirmation result found. Please try signing in again."
+        });
+        setLoading(false);
+        router.push('/login');
+        return;
     }
-  }, [state, toast])
+
+    try {
+        await window.confirmationResult.confirm(otp);
+        toast({
+            title: "Success!",
+            description: "You have been successfully signed in.",
+        });
+        router.push('/chat');
+    } catch(err: any) {
+        console.error("OTP Verification error", err);
+        let description = "An unexpected error occurred.";
+        if (err.code === 'auth/invalid-verification-code') {
+            description = "The code you entered is invalid. Please try again.";
+        } else if (err.code === 'auth/code-expired') {
+            description = "The code has expired. Please request a new one.";
+        }
+        setError(description);
+        toast({
+            variant: "destructive",
+            title: "Verification Failed",
+            description: description,
+        });
+    } finally {
+        setLoading(false);
+    }
+
+  }
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="otp">One-Time Password</Label>
         <Input
@@ -42,14 +79,18 @@ export function VerifyOtpForm() {
           placeholder="123456"
           required
           maxLength={6}
-          pattern="\d{6}"
+          pattern="\\d{6}"
           title="Enter the 6-digit code"
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
         />
-        {state?.errors?.otp && (
-          <p className="text-sm font-medium text-destructive">{state.errors.otp[0]}</p>
+        {error && (
+          <p className="text-sm font-medium text-destructive">{error}</p>
         )}
       </div>
-      <SubmitButton />
+       <Button type="submit" className="w-full bg-accent hover:bg-accent/90" disabled={loading}>
+        {loading ? 'Verifying...' : 'Verify'}
+      </Button>
     </form>
   );
 }

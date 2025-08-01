@@ -1,18 +1,30 @@
+
+'use client';
 import { AuthCard } from '@/components/auth/AuthCard';
 import { VerifyOtpForm } from '@/components/auth/VerifyOtpForm';
-import type { Metadata } from 'next';
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
-export const metadata: Metadata = {
-  title: 'Verify OTP - NumeroConnect',
-};
 
-export default function VerifyOtpPage() {
+function VerifyOtpContent() {
+  const searchParams = useSearchParams();
+  const phone = searchParams.get('phone');
+
   return (
-    <AuthCard
+     <AuthCard
       title="Check your phone"
-      description="We've sent a 6-digit code. Please enter it below."
+      description={`We've sent a 6-digit code to ${phone || 'your phone'}. Please enter it below.`}
     >
       <VerifyOtpForm />
     </AuthCard>
+  )
+}
+
+
+export default function VerifyOtpPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <VerifyOtpContent />
+    </Suspense>
   );
 }
