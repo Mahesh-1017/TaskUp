@@ -3,13 +3,12 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
-  "projectId": "numeroconnect-637lh",
-  "appId": "1:818339710146:web:01271839b424e1d7d9675b",
-  "storageBucket": "numeroconnect-637lh.firebasestorage.app",
-  "apiKey": "AIzaSyDegTkPCfQC6nYziFLncbfnM7r-WUuo8nw",
-  "authDomain": "numeroconnect-637lh.firebaseapp.com",
-  "measurementId": "",
-  "messagingSenderId": "818339710146"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
