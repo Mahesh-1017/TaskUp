@@ -1,3 +1,6 @@
+
+'use client';
+
 import { contacts, messages as allMessages } from '@/lib/data';
 import type { Contact } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -6,16 +9,35 @@ import { MessageDisplay } from './MessageDisplay';
 import { SummaryButton } from './SummaryButton';
 import { notFound } from 'next/navigation';
 import { ScrollArea } from '../ui/scroll-area';
+import { Button } from '../ui/button';
+import { Phone, Video } from 'lucide-react';
+import { useState } from 'react';
+import { CallView } from './CallView';
 
-export async function ChatView({ contactId }: { contactId: string }) {
+export function ChatView({ contactId }: { contactId: string }) {
   const contact: Contact | undefined = contacts.find((c) => c.id === contactId);
   const messages = allMessages[contactId] || [];
+
+  const [callState, setCallState] = useState<{active: boolean, type: 'video' | 'voice' | null}>({ active: false, type: null });
+
+  if (!contact) {
+    notFound();
+  }
+  
+  const startCall = (type: 'video' | 'voice') => {
+    setCallState({ active: true, type });
+  }
+
+  const endCall = () => {
+    setCallState({ active: false, type: null });
+  }
 
   if (!contact) {
     notFound();
   }
 
   return (
+    <>
     <div className="flex flex-1 flex-col bg-background">
       <header className="flex items-center gap-4 p-4 border-b border-border/50 bg-card/50">
         <Avatar className="h-10 w-10">
@@ -23,7 +45,13 @@ export async function ChatView({ contactId }: { contactId: string }) {
           <AvatarFallback>{contact.name.charAt(0)}</AvatarFallback>
         </Avatar>
         <h2 className="text-lg font-semibold">{contact.name}</h2>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={() => startCall('video')}>
+            <Video className="h-5 w-5" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => startCall('voice')}>
+            <Phone className="h-5 w-5" />
+          </Button>
           <SummaryButton messages={messages} />
         </div>
       </header>
@@ -38,5 +66,13 @@ export async function ChatView({ contactId }: { contactId: string }) {
 
       <MessageInput />
     </div>
+    {callState.active && contact && (
+        <CallView 
+            contact={contact} 
+            type={callState.type!} 
+            onEndCall={endCall} 
+        />
+    )}
+    </>
   );
 }
