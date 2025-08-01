@@ -1,11 +1,11 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useFormStatus } from 'react-dom';
 import { verifyOtp } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useEffect } from 'react';
+import { useActionState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 function SubmitButton() {
@@ -18,7 +18,7 @@ function SubmitButton() {
 }
 
 export function VerifyOtpForm() {
-  const [state, formAction] = useFormState(verifyOtp, null);
+  const [state, formAction] = useActionState(verifyOtp, null);
   const { toast } = useToast();
 
   useEffect(() => {
